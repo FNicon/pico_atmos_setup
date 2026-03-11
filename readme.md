@@ -56,6 +56,7 @@ echo "/src/" >> .git/modules/resources/atmos/info/sparse-checkout
 
 ## Atmos Folder Setup
 
+```
 atmos
 ├── atmos (from https://github.com/lua-atmos/atmos)
 │   ├── env/ (from https://github.com/lua-atmos/atmos)
@@ -68,6 +69,7 @@ atmos
 │   └── x.lua (from https://github.com/lua-atmos/atmos)
 ├── streams/ (from https://github.com/lua-atmos/f-streams/tree/main/streams)
 └── launch (from https://github.com/atmos-lang/atmos/blob/main/atmos)
+```
 
 ## 
 
