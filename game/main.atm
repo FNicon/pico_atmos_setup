@@ -1,7 +1,15 @@
-require "atmos.env.clock"
+require "atmos.env.pico"
+set pico = require "pico"
 
-watching @5 {
-    every @1 {
-        print "Hello World!"
+pico.init(true)
+
+watching @1 {
+    loop {
+        await @.100
+        watching @.100 {
+            pico.output.draw.text( 0, @{ '%', x=0.1, y=0.9, h=0.075 })
+            pico.output.draw.text( 0, @{ '%', x=0.9, y=0.9, h=0.075 })
+        }
     }
 }
+pico.input.delay(10000)

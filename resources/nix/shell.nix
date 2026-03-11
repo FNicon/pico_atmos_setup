@@ -3,6 +3,7 @@
 let
   nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/tarball/nixos-25.11";
   pkgs = import nixpkgs { };
+  PROJECT_ROOT = builtins.toString ./.;
 in
 with pkgs;
 mkShell {
@@ -15,6 +16,7 @@ mkShell {
   ];
 
   packages = with pkgs; [
+    cowsay
     lolcat
 
     libgcc
@@ -33,12 +35,6 @@ mkShell {
     ))
   ];
 
-  # shellHook = ''
-  #   cd atmos
-  #   chmod +x launch
-  #   ./launch ../../../game/main.atm
-  # '';
-
   shellHook = ''
     cd pico-sdl/lua
     chmod +x pico-lua
@@ -49,7 +45,11 @@ mkShell {
     pkg-config --cflags --libs sdl2 SDL2_image SDL2_mixer SDL2_ttf SDL2_gfx  
 
     make pico_native.so
-    mv pico/pico_native.so pico_native.so
-    ./pico-lua
+    mv ./pico/pico_native.so ../../atmos/pico_native.so
+    cowsay start atmos | lolcat
+    cd ../../atmos
+    chmod +x launch
+    ./launch ../../../game/main.atm
+    exit
   '';
 }
