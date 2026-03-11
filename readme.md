@@ -1,4 +1,4 @@
-
+# Atmos
 
 ## Atmos-Lang
 
@@ -54,7 +54,28 @@ cd ../
 echo "/src/" >> .git/modules/resources/atmos/info/sparse-checkout
 ```
 
+## Atmos Folder Setup
 
+atmos
+├── atmos (from https://github.com/lua-atmos/atmos)
+│   ├── env/ (from https://github.com/lua-atmos/atmos)
+│   │   ├──...
+│   ├── lang/ (from https://github.com/atmos-lang/atmos/tree/main/src)
+│   ├── init.lua (from https://github.com/lua-atmos/atmos)
+│   ├── run.lua (from https://github.com/lua-atmos/atmos)
+│   ├── streams.lua (from https://github.com/lua-atmos/atmos)
+│   ├── util.lua (from https://github.com/lua-atmos/atmos)
+│   └── x.lua (from https://github.com/lua-atmos/atmos)
+├── streams/ (from https://github.com/lua-atmos/f-streams/tree/main/streams)
+└── launch (from https://github.com/atmos-lang/atmos/blob/main/atmos)
+
+## 
+
+```bash
+cd resources/nix/atmos
+chmod +x launch
+./launch ../../../game/main.atm
+```
 
 ## Reference
 
