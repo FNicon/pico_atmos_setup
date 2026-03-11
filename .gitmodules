@@ -8,3 +8,6 @@
 [submodule "resources/atmos-lang"]
 	path = resources/atmos-lang
 	url = https://github.com/atmos-lang/atmos/
+[submodule "resources/pico-sdl"]
+	path = resources/pico-sdl
+	url = https://github.com/fsantanna/pico-sdl
