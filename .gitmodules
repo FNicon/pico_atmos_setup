@@ -1,0 +1,10 @@
+[submodule "resources/atmos"]
+	path = resources/atmos
+	url = https://github.com/lua-atmos/atmos
+
+[submodule "resources/f-streams"]
+	path = resources/f-streams
+	url = https://github.com/lua-atmos/f-streams/
+[submodule "resources/atmos-lang"]
+	path = resources/atmos-lang
+	url = https://github.com/atmos-lang/atmos/
