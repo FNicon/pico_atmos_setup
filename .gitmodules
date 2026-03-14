@@ -11,3 +11,9 @@
 [submodule "resources/pico-sdl"]
 	path = resources/pico-sdl
 	url = https://github.com/fsantanna/pico-sdl
+[submodule "game/rocks"]
+	path = game/rocks
+	url = https://github.com/atmos-lang/pico-rocks
+[submodule "game/birds"]
+	path = game/birds
+	url = https://github.com/atmos-lang/pico-birds/
