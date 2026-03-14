@@ -125,6 +125,51 @@ chmod +x launch
 ./launch ../../../game/main.atm
 ```
 
+## pico in atmos-lang errors
+
+### pico_init: Assertion `G.init == 1' failed.
+pico need to be initialized first.
+```
+pico.init(true)
+```
+
+### attempt to call a nil value (field 'title')
+
+it's not like this :
+```
+pico.zet.title "Birds - 01 (task)"
+```
+but this :
+```
+pico.zet.window @{title="Birds - 01 (task)"}
+```
+
+### module 'battle' not found:
+
+set your projects folder like this.
+
+```
+game/
+├── atmos/
+│  ├── env/
+│  │  ...
+│  ├── lang/
+│  │  ...
+│  │  └── run.lua
+│  ...
+│  └── init.lua
+├── pico/
+│  ...
+│  └── init.lua
+├── streams/
+│  └── init.lua
+├── pico_native.so
+├── pico-lua
+├── launch 
+├── battle.atm
+└── main.atm
+```
+
 ## Reference
 
 https://gist.github.com/ZhuoyunZhong/2c08c8549616e03b7f508fea64130558

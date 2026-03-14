@@ -49,7 +49,7 @@ mkShell {
     cowsay start atmos | lolcat
     cd ../../../../game/birds
     chmod +x launch
-    ./launch birds-11.atm
+    ./launch birds-01.atm
     # ./launch main.atm
     exit
   '';
