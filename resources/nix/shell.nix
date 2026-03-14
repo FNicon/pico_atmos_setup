@@ -45,11 +45,12 @@ mkShell {
     pkg-config --cflags --libs sdl2 SDL2_image SDL2_mixer SDL2_ttf SDL2_gfx  
 
     make pico_native.so
-    mv ./pico/pico_native.so ../../atmos/pico_native.so
+    mv ./pico/pico_native.so ../../../../game/birds/pico_native.so
     cowsay start atmos | lolcat
-    cd ../../atmos
+    cd ../../../../game/birds
     chmod +x launch
-    ./launch ../../../game/main.atm
+    ./launch birds-11.atm
+    # ./launch main.atm
     exit
   '';
 }
