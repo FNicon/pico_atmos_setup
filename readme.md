@@ -8,8 +8,6 @@ atmos-lang(atmos(f-streams))
 
 pico-lua (pico-sdl (sdl2))
 
-# Atmos
-
 ## Atmos-Lang
 
 ```bash
@@ -169,6 +167,14 @@ game/
 ├── battle.atm
 └── main.atm
 ```
+
+## Note when setup in NixOS
+
+Because in NixOS you can kinda set up virtual environment in Nix Shell without affecting outside the virtual environment, we need to change "Lua5.4" to "Lua" from source code and install Lua5.4 as Lua instead. 
+
+We also need tell the program know where the sdl libs are. so we need to add pkg_configs on pico-sdl/lua/Makefile to setup pico_native.so
+
+
 
 ## Reference
 
