@@ -1,16 +1,15 @@
 require "atmos"
-local env  = require "atmos.env.pico"
+require "atmos.env.pico"
 local pico = require "pico"
 
-pico.set.size.window({x=500,y=500}, {x=100,y=100})
-
-local pt1 = pico.pos(0,0)
-local pt2 = pico.pos(100,100)
-local pt = {x=0, y=0}
-
-local dy = (pt2.y - pt1.y) / (pt2.x - pt1.x)
+pico.set.window { dim = {'!', w=500, h=500} }
 
 loop(function()
+    local pt1 = {x=0, y=0}
+    local pt2 = {x=100, y=100}
+    local pt = {'!', x=0, y=0}
+
+    local dy = (pt2.y - pt1.y) / (pt2.x - pt1.x)
     par_or(function()
         every('draw',function()
             pico.output.draw.pixel(pt)

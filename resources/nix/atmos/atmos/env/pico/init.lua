@@ -4,18 +4,17 @@ local pico  = require "pico"
 pico.zet = pico.set     -- because of `set` keyword in Atmos
 
 local M = {
-    mpf = 25,   -- 0: as fast as possible
+    fps = 30,
     now = 0,
-    ren = nil,
     mode = { primary=true, secondary=true },
 }
 
-function M.open ()
-    pico.init(true)
-    pico.set.expert(true)
-end
+pico.init(true)
+pico.set.expert(true, M.fps)
 
-local MS = M.mpf
+function M.quit ()
+    pico.init(false)
+end
 
 local meta = {
     __atmos = function (awt, e)
@@ -42,30 +41,16 @@ local meta = {
     end
 }
 
-function M.close ()
-    pico.init(false)
-end
-
 function M.step ()
     local mcur = M.mode and M.mode.current
 
-    local old = pico.get.ticks()
-    local e = pico.input.event((mcur == 'secondary') and 0 or MS)
-    local cur = pico.get.ticks()
-
-    if mcur ~= 'secondary' then
-        if M.mpf == 0 then
-            local dt = (cur - M.now)
-            M.now = cur
-            emit('clock', dt, M.now)
-        else
-            MS = MS - (cur-old)
-            if MS <= 0 then
-                MS = M.mpf + MS
-                M.now = cur
-                emit('clock', M.mpf, M.now)
-            end
-        end
+    local e, ms
+    if mcur == 'secondary' then
+        e = pico.input.event(0)
+    else
+        e,ms = pico.input.event()
+        M.now = pico.get.now()
+        emit('clock', ms, M.now)
     end
 
     if e then
