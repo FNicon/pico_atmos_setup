@@ -1,0 +1,33 @@
+require "atmos.env.pico"
+val pico = require "pico"
+
+func Animate (x, y, frames, fps, indicator) {
+    var xx  = x
+    var yy  = y
+    var img = frames[1]
+
+    var frame_accumulate = 0
+    par {
+        every @fps {
+            set frame_accumulate = frame_accumulate + (1 * indicator)
+            var frame = (frame_accumulate % #frames) + 1
+            set img = frames[frame]
+        }
+    } with {
+        every :draw {
+            pico.output.draw.image(img, @{'%',x=xx,y=yy})
+        }
+    }
+}
+
+spawn Animate(0.5, 0.5, @{
+    "assets/plane_1.png",
+    "assets/plane_2.png",
+    "assets/plane_3.png",
+    "assets/plane_4.png",
+    "assets/plane_5.png",
+    "assets/plane_6.png",
+    "assets/plane_7.png",
+    "assets/plane_8.png"
+}, 1/12, -1)
+await (false)

@@ -37,20 +37,18 @@ mkShell {
 
   shellHook = ''
     cd pico-sdl/lua
-    chmod +x pico-lua
 
-    LD_LIBRARY_PATH=${pkgs.lua5_4}/include:${pkgs.SDL2}/lib:${pkgs.SDL2_image}/lib:${pkgs.SDL2_mixer}/lib:${pkgs.SDL2_ttf}/lib:${pkgs.SDL2_gfx}/lib
-    echo $LD_LIBRARY_PATH | lolcat
+    # LD_LIBRARY_PATH=${pkgs.lua5_4}/include:${pkgs.SDL2}/lib:${pkgs.SDL2_image}/lib:${pkgs.SDL2_mixer}/lib:${pkgs.SDL2_ttf}/lib:${pkgs.SDL2_gfx}/lib
+    # echo $LD_LIBRARY_PATH | lolcat
 
-    pkg-config --cflags --libs sdl2 SDL2_image SDL2_mixer SDL2_ttf SDL2_gfx  
+    # pkg-config --cflags --libs sdl2 SDL2_image SDL2_mixer SDL2_ttf SDL2_gfx  
 
-    make pico_native.so -B
-    # mv ./pico/pico_native.so ../../../../game/birds/pico_native.so
-    # cowsay start atmos | lolcat
-    # cd ../../../../game/birds
-    # chmod +x launch
-    # ./launch birds-01.atm
-    # ./launch main.atm
+    # make pico_native.so -B
+    # mv ./pico/pico_native.so ../../../../game/animation/pico_native.so
+    cowsay start atmos | lolcat
+    cd ../../../../game/animation
+    chmod +x launch
+    ./launch main.atm
     exit
   '';
 }
