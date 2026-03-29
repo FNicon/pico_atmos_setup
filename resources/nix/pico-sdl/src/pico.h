@@ -126,37 +126,36 @@ void pico_quit (void);
 /// @{
 
 /// @brief Stops the program until the given number of milliseconds have passed.
+/// Equivalent to `pico_input_event_timeout(NULL, PICO_EVENT_NONE, ms)`.
 /// @include delay.c
 /// @param ms milliseconds to wait
-void pico_input_delay (int ms);
+/// @return elapsed time in milliseconds (delta time)
+int pico_input_delay (int ms);
 
-/// @brief Stops the program until an event occurs.
+/// @brief Stops the program until a matching event occurs.
+/// Equivalent to `pico_input_event_timeout(evt, type, -1)`.
 /// @include event.c
 /// @param evt where to save the event data, or NULL to ignore
-/// @param type type of event to wait for (Pico_EventType)
-/// @sa pico_input_event_ask
+/// @param type type of event to wait for (PICO_EVENT_ANY for any)
+/// @return elapsed time in milliseconds (delta time)
 /// @sa pico_input_event_timeout
-void pico_input_event (Pico_Event* evt, int type);
+int pico_input_event (Pico_Event* evt, int type);
 
-/// @brief Checks if an event has occured.
-/// @param evt where to save the event data, or NULL to ignore
-/// @param type type of event to check the occurence (Pico_EventType)
-/// @return 1 if the given type of event has occurred, or 0 otherwise
-/// @sa pico_input_event
-/// @sa pico_input_event_timeout
-int  pico_input_event_ask (Pico_Event* evt, int type);
-
-/// @brief Stops the program until an event occurs or a timeout is reached.
+/// @brief Stops the program until a matching event occurs or a timeout is reached.
+/// All input functions delegate to this one.
+/// Internal events (quit/exit, window resize, ctrl+zoom/scroll/grid) are
+/// handled automatically and never forwarded.
+/// On timeout, evt->type is set to PICO_EVENT_NONE.
 /// @include event_timeout.c
 /// @param evt where to save the event data, or NULL to ignore
-/// @param type type of event to wait for (Pico_EventType)
-/// @param timeout time limit to wait for (milliseconds)
-/// @return 1 if the given type of event has occurred, or 0 otherwise
+/// @param type type of event to wait for (PICO_EVENT_ANY for any)
+/// @param timeout time limit in milliseconds, or -1 to wait forever
+/// @return elapsed time in milliseconds (delta time)
 /// @sa pico_input_event
-/// @sa pico_input_event_ask
-int  pico_input_event_timeout (Pico_Event* evt, int type, int timeout);
+int pico_input_event_timeout (Pico_Event* evt, int type, int timeout);
 
 /// @brief Blocks in an event loop until the window is closed.
+/// Equivalent to `pico_input_event(NULL, PICO_EVENT_QUIT)`.
 void pico_input_loop (void);
 
 /// @}
@@ -278,8 +277,9 @@ Pico_Color pico_get_color_clear (void);
 Pico_Color pico_get_color_draw (void);
 
 /// @brief Gets the state of expert mode.
+/// @param fps optional pointer to receive fps value (NULL to ignore)
 /// @return 1 if enabled, or 0 otherwise
-int pico_get_expert (void);
+int pico_get_expert (int* fps);
 
 /// @brief Gets the font used to draw texts.
 /// @return path to the current font file
@@ -296,11 +296,6 @@ Pico_Abs_Dim pico_get_image (const char* path, Pico_Rel_Dim* dim);
 /// @param rect optional rect with w/h to complete (NULL ok)
 /// @return video properties (dim, fps, frame, done)
 Pico_Video pico_get_video (const char* path, Pico_Rel_Rect* rect);
-
-/// @brief Gets the state of a key.
-/// @param key key constant
-/// @return 1 if key is pressed, or 0 otherwise
-int pico_get_key (PICO_KEY key);
 
 /// @brief Gets current layer key.
 /// @return layer key (NULL = main layer)
@@ -406,12 +401,18 @@ void pico_layer_video_mode (int mode,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// @brief Gets the keyboard state (current modifier flags).
+/// @return keyboard state with modifier flags (key is 0 when polling)
+Pico_Keyboard pico_get_keyboard (void);
+
 /// @brief Gets the mouse state.
-/// @param pos where to save the mouse position (mode determines coordinate
-///            system: '!' for pixels, '%' for percentage, '#' for tiles)
-/// @param button mouse button to check (1=left, 2=middle, 3=right), or 0 for any
-/// @return 1 if the specified button is pressed, or 0 otherwise
-int pico_get_mouse (Pico_Rel_Pos* pos, int button);
+/// @param mode coordinate mode ('!' pixels, '%' percentage, '#' tiles, 'w' window, 0 uses default)
+/// @return mouse state with position and button flags
+Pico_Mouse pico_get_mouse (char mode);
+
+/// @brief Gets the amount of ticks that passed since pico was initialized.
+/// @return elapsed time in milliseconds
+Uint32 pico_get_now (void);
 
 /// @brief Gets the visibility state of the window.
 /// @return 1 if visible, or 0 otherwise
@@ -442,10 +443,6 @@ Pico_Abs_Dim pico_get_text_mode (
     const char* key, const char* text,
     Pico_Rel_Dim* dim
 );
-
-/// @brief Gets the amount of ticks that passed since pico was initialized.
-/// @return elapsed time in milliseconds
-Uint32 pico_get_ticks (void);
 
 /// @brief Gets the current view configuration. NULL arguments are ignored.
 /// @param grid pointer to retrieve grid state
@@ -488,9 +485,11 @@ void pico_set_color_clear (Pico_Color color);
 /// @param color new color
 void pico_set_color_draw (Pico_Color color);
 
-/// @brief Toggles the expert mode.
+/// @brief Toggles the expert mode with optional FPS timing.
 /// @param on 1 to enable it, or 0 to disable it
-void pico_set_expert (int on);
+/// @param fps target frames per second (0 = wait forever, -1 = as fast as possible, N>0 = fixed FPS)
+/// @return frame period in ms
+int pico_set_expert (int on, int fps);
 
 /// @brief Changes the font used to draw texts.
 /// @param path path to font file
@@ -503,6 +502,10 @@ void pico_set_layer (const char* key);
 /// @brief Toggles the application window visibility.
 /// @param on 1 to show, or 0 to hide
 void pico_set_show (int on);
+
+/// @brief Sets the default mouse coordinate mode.
+/// @param mode coordinate mode ('!' pixels, '%' percentage, '#' tiles, 'w' window)
+void pico_set_mouse (char mode);
 
 /// @brief Sets the drawing style.
 /// @param style new style
@@ -549,7 +552,7 @@ void pico_set_dim (Pico_Rel_Dim* dim);
 // PUSH / POP
 
 /// @brief Saves the current drawing state onto a stack.
-/// Saves: alpha, angle, colors, crop, font, style, layer.
+/// Saves: alpha, colors, font, mouse, style, layer.
 /// @sa pico_pop
 void pico_push (void);
 
