@@ -2,7 +2,9 @@ local S = require "atmos.streams"
 require "atmos.util"
 local lanes -- lazy require in `spawn`
 
-local M = {}
+local M = {
+    thread_modules = {}, -- requires to pass to threads
+}
 
 local task_gc
 
@@ -99,7 +101,7 @@ function M.is (v, x)
         return true
     elseif mt==meta_tasks and x=='tasks' then
         return true
-    elseif tp=='table' and type(x)=='string' then
+    elseif tp=='table' and type(x)=='string' and type(v.tag)=='string' then
         return (string.find(v.tag or '', '^'..x) == 1)
     else
         return false
@@ -164,12 +166,11 @@ function M.env (e)
     if #_envs_ == 1 then
         -- ok: first env may support any mode
     else
+        local i = #_envs_
         assertn(2, _envs_[1].mode and _envs_[1].mode.primary,
-            "invalid env : primary env must support primary mode")
+            "invalid env : first env must support primary mode")
         assertn(2, _envs_[i].mode and _envs_[i].mode.secondary,
-            "invalid env : non-primary envs must support secondary mode")
-        assertn(2, #_envs_==0 or _envs_[1].mode,
-            "invalid env : previous env is single-env only (mode not set)")
+            "invalid env : non-first envs must support secondary mode")
         _envs_[1].mode.current = 'primary'
         e.mode.current = 'secondary'
     end
@@ -324,12 +325,10 @@ end
 function M.loop (body, ...)
     assertn(2, type(body)=='function', "invalid loop : expected body function")
     return xcall(debug.getinfo(2), "loop", function (...)
+        local f = body
         local _ <close> = M.defer(function ()
             M.stop()
         end)
-        for _, env in ipairs(_envs_) do
-            if env.open then env.open() end
-        end
         local t <close> = M.spawn(debug.getinfo(4), nil, false, body, ...)
         while true do
             if coroutine.status(t._.th) == 'dead' then
@@ -353,15 +352,14 @@ end
 function M.start (body, ...)
     assertn(2, type(body)=='function', "invalid start : expected body function")
     assertn(2, #_envs_==1 and _envs_[1].mode==nil, "invalid start : expected single-mode env only")
-    if _envs_[1].open then _envs_[1].open() end
     M.spawn(debug.getinfo(2), nil, false, body, ...)
 end
 
 function M.stop ()
     meta_tasks.__close(TASKS)
     for i=#_envs_, 1, -1 do
-        if _envs_[i].close then
-            _envs_[i].close()
+        if _envs_[i].quit then
+            _envs_[i].quit()
         end
         _envs_[i] = nil
     end
@@ -418,6 +416,20 @@ function M.task (dbg, tra, f)
     TASKS._.cache[t._.th] = t
     setmetatable(t, meta_task)
     return t
+end
+
+function M.abort (t)
+    assertn(2, getmetatable(t)==meta_task or getmetatable(t)==meta_tasks, "invalid abort : expected task")
+    getmetatable(t).__close(t)
+    if t._.up then
+        t._.up._.gc = true
+    end
+    local me = M.me(true)
+    if me and me._.status=='aborted' then
+        -- TODO: lua5.5
+        coroutine.yield()
+        error "bug found"
+    end
 end
 
 function M.spawn (dbg, up, tra, t, ...)
@@ -780,6 +792,7 @@ function M.emit (stk, to, e, ...)
     if me and me._.status=='aborted' then
         -- TODO: lua5.5
         coroutine.yield()   -- wait to be closed from outside
+        error "bug found"
     end
     return ret
 end
@@ -833,14 +846,17 @@ function M.thread (f)
 
     local gen = _gen_cache[f]
     if not gen then
-        gen = lanes.gen("*", function (linda)
+        gen = lanes.gen("*", function (linda, mods)
+            for _,mod in ipairs(mods) do
+                require(mod)
+            end
             linda:send("ok", { pcall(f) })
         end)
         _gen_cache[f] = assert(gen)
     end
 
     local linda = lanes.linda()
-    local lane = assert(gen(linda))
+    local lane = assert(gen(linda, M.thread_modules))
 
     local _ <close> = M.defer(function ()
         while lane.status == 'pending' do
