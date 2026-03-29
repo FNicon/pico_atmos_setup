@@ -17,3 +17,6 @@
 [submodule "game/birds"]
 	path = game/birds
 	url = https://github.com/atmos-lang/pico-birds/
+[submodule "resources/atmos-env/env-pico"]
+	path = resources/atmos-env/env-pico
+	url = https://github.com/lua-atmos/env-pico
